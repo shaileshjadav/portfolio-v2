@@ -1,0 +1,161 @@
+---
+title: "OAUTH 2.O"
+publishedAt: "2024-07-20"
+summary: "OAUTH 2.O Practical Example using Ory-hydra in NodeJS."
+tags: ['OAUTH 2.0', 'ory-hydra', 'nodejs', 'backend']
+---
+
+Let’s Understand OAuth 2.0 with example in NodeJS and ory-hydra
+
+## What is oauth? ##
+
+OAuth stands for Open Authorization. It’s an open standard for authorization that allows client applications, such as websites or mobile apps, to access server resources on behalf of a specific Resource Owner.
+
+### Example ###
+Imagine LinkedIn asks a user for access to their Google contacts. Google doesn’t share the user’s credentials with LinkedIn. Instead, Google provides a token to the LinkedIn app, which LinkedIn uses to access the user’s contacts.
+
+Does this token allow LinkedIn to access all user data, like the inbox or photos? No, Google gives LinkedIn limited access to only the user’s contacts. This entire process is standardized and is called OAuth.
+
+## How Does It Work? ##
+
+Before a client application can access a user’s resources on another platform, the user (Resource Owner) must grant authorization.
+
+This process begins with the user giving consent to access their resources. OAuth 2.0 employs a mechanism called “scope” to control the type of resources and actions the application is allowed to perform.
+
+### Terminology ###
+
+**Resource Owner:**
+
+This is the person or entity that can give access to a protected resource. When it’s a person, they’re called an end user.
+
+**Resource Server:**
+This server holds the protected resources and can handle requests using access tokens. Here, the API Gateway works as a gateway that stands in front of the protected resources.
+
+**Client Application:**
+This is the app that makes requests to access resources on behalf of the Resource Owner, with their permission.
+
+**Authorization Server:**
+This server gives access tokens to the client application after verifying the Resource Owner and getting their authorization. The API Gateway can act as both the Authorization Server and the Resource Server.
+
+**Scope:**
+This term is used to define and control what data a client application can access from the Resource Owner. The scopes in the incoming message can be checked against those registered in the API Gateway. An example scope might be “users read”.
+
+**OpenId:**
+ OpenID is an open standard and decentralized protocol that allows users to be authenticated by certain cooperating sites (known as relying parties) using a third-party service, eliminating the need for users to have multiple usernames and passwords across different websites.
+
+ ## Difference between openId and OAuth: ##
+ 
+**OpenID :** Primarily used for authentication. It verifies the identity of the user, ensuring they are who they claim to be.
+
+**OAuth :** Primarily used for authorization. It allows an application to access resources on behalf of a user without sharing the user’s credentials.
+
+Let’s look into flow using below Sequence Diagram:
+
+![ oauth-2](/blogs/oauth-2.webp).
+
+Image source: https://www.ory.sh/hydra/docs/concepts/login
+
+## Enough talk now let’s jump into coding ##
+
+Let’s create an application that allows users to log in to multiple apps using a single set of credentials.
+
+Here we are using Nodejs and [ory-hydra](https://www.ory.sh/hydra) as connect provider.
+
+Clone: **https://github.com/shaileshjadav/oauth-example.git**
+
+Let’s install ory-hydra in docker. create docker-compose & .env file and paste below.
+
+**.env**
+
+```
+    SECRETS_SYSTEM=this-is-the-primary-secret
+    DSN=postgres://hydra:secret@ory-postgres:5432/hydra?sslmode=disable
+```
+
+**docker-compose.yml**
+```
+    version: ‘3.3’
+
+    services:
+
+    hydra-migrate:
+    image: oryd/hydra:v1.10.6
+    container_name: ory-hydra-migrate
+    restart: on-failure
+    networks:
+    — hydraguide
+    environment:
+    DSN: “${DSN}”
+    command: migrate sql — yes ${DSN}
+    depends_on:
+    — postgres
+
+    hydra:
+    image: oryd/hydra:v1.10.6
+    container_name: ory-hydra-example
+    restart: on-failure
+    networks:
+    — hydraguide
+    ports:
+    — “5444:4444”
+    — “5445:4445”
+    environment:
+    SECRETS_SYSTEM: “${SECRETS_SYSTEM}”
+    DSN: “${DSN}”
+    URLS_SELF_ISSUER: “http://localhost:5444/”
+    URLS_CONSENT: “http://localhost:9020/consent"
+    URLS_LOGIN: “http://localhost:9020/login"
+    command: serve all — dangerous-force-http
+    depends_on:
+    — postgres
+
+    postgres:
+    image: postgres:9.6
+    container_name: ory-postgres
+    networks:
+    — hydraguide
+    environment:
+    POSTGRES_USER: hydra
+    POSTGRES_PASSWORD: secret
+    POSTGRES_DB: hydra
+    volumes:
+    — postgres_data:/var/lib/postgresql/data
+
+    networks:
+    hydraguide:
+    driver: bridge
+
+    volumes:
+    postgres_data:
+```
+
+By using docker-compose up command, it’s installed all ory-hydra, postgress.
+
+Now let’s register our application (or create a client) which is going to use resources of user.
+
+Run below command make sure curl installed (or can call api with postman)
+
+```
+    curl -X POST ‘http://localhost:5445/clients' -H ‘Content-Type: application/json’ — data-raw ‘{
+    “client_id”: “nodeApp”,
+    “client_name”: “nodeApp”,
+    “client_secret”: “someSecret”,
+    “grant_types”: [“authorization_code”, “refresh_token”],
+    “redirect_uris”: [“http://localhost:9010/callback"],
+    “response_types”: [“code”, “id_token”],
+    “scope”: “offline users.write users.read users.edit users.delete”,
+    “token_endpoint_auth_method”: “client_secret_basic”
+    }’
+```
+
+Here auth-server app is resouce server while node-app is application which is using resouces on behalf of user.
+
+Now run both apps and intiate flow from url http://localhost:9010/ and login with fake credentails as per instructions.
+
+After login it’s redirect to callback url which exchange the auth-code and get access token and refresh-token. now this token is valid to access data from auth-server by node-app. This way node-app uses authentication of auth-server to access user information as per given constent by user.
+
+Any application which want Ouath of auth-server can use by just create new clients in auth-server.
+
+Here http://localhost:9020/consent/check is route to check token valid or not and http://localhost:9010/token is route to get new access token using refresh token.
+
+Happy Coding!

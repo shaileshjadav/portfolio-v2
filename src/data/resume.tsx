@@ -10,7 +10,7 @@ export const DATA = {
   description:
     "Senior Software Engineer passionate about crafting innovative and scalable solutions that bring ideas to life.",
   summary:
-    "I'm a curious builder, backend enthusiast, and tech lead with over 7 years of experience in web development. From crafting robust APIs to scaling container-based infrastructures, I love making things that solve real-world problems. I'm often experimenting with new tools, writing blog posts, or mentoring juniors in the tech community.",
+    "I'm a curious builder, backend enthusiast, and tech lead with over 7+ years of experience in web development. From crafting robust APIs to scaling container-based infrastructures, I love making things that solve real-world problems. I'm often experimenting with new tools, writing blog posts, or mentoring juniors in the tech community.",
   avatarUrl: "/me.png",
   skills: [
     "Node.js",

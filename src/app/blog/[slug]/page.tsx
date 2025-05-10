@@ -4,6 +4,8 @@ import { formatDate } from "@/lib/utils";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export async function generateStaticParams() {
   const posts = await getBlogPosts();
@@ -102,6 +104,18 @@ export default async function Blog({
         className="prose dark:prose-invert"
         dangerouslySetInnerHTML={{ __html: post.source }}
       ></article>
+
+      <div className="flex flex-wrap gap-1 mt-5">
+            {post.metadata.tags.map((skill, id) => (
+                <Badge key={skill}>{skill}</Badge>
+            ))}
+          </div>
+      
+
+        <div className=" mt-10 mb-5 ">
+            <h2 className="text-xl font-bold">Author</h2>
+              <p>{DATA.name}</p>
+          </div>
     </section>
   );
 }

@@ -8,10 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { DATA } from "@/data/resume";
 import Link from "next/link";
 import Markdown from "react-markdown";
+import { getBlogPosts } from "@/data/blog";
 
 const BLUR_FADE_DELAY = 0.04;
 
-export default function Page() {
+export default async function Page() {
+  const posts = await getBlogPosts();
   return (
     <main className="flex flex-col min-h-[100dvh] space-y-10">
       <section id="hero">
@@ -152,46 +154,55 @@ export default function Page() {
           </div>
         </div>
       </section>
-      <section id="hackathons">
+
+      <section id="blogsList">
         <div className="space-y-12 w-full py-12">
           <BlurFade delay={BLUR_FADE_DELAY * 13}>
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
-                  Hackathons
+                  Engineering Insights & Dev Notes
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  I like building things
+                  Tech is a craft, not just a job
                 </h2>
                 <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  During my time in university, I attended{" "}
-                  {DATA.hackathons.length}+ hackathons. People from around the
-                  country would come together and build incredible things in 2-3
-                  days. It was eye-opening to see the endless possibilities
-                  brought to life by a group of motivated and passionate
-                  individuals.
+                  This space is where I explore the craft—from quick hacks to scalable backend systems in production. I dive into designing better APIs, optimizing performance, writing maintainable code, and occasionally sharing my take on or understanding of complex technical architectures.
                 </p>
               </div>
             </div>
           </BlurFade>
           <BlurFade delay={BLUR_FADE_DELAY * 14}>
-            <ul className="mb-4 ml-4 divide-y divide-dashed border-l">
-              {DATA.hackathons.map((project, id) => (
-                <BlurFade
-                  key={project.title + project.dates}
-                  delay={BLUR_FADE_DELAY * 15 + id * 0.05}
-                >
-                  <HackathonCard
-                    title={project.title}
-                    description={project.description}
-                    location={project.location}
-                    dates={project.dates}
-                    image={project.image}
-                    links={project.links}
-                  />
+            {posts
+              .sort((a, b) => {
+                if (
+                  new Date(a.metadata.publishedAt) >
+                  new Date(b.metadata.publishedAt)
+                ) {
+                  return -1;
+                }
+                return 1;
+              })
+              .map((post, id) => (
+                <BlurFade delay={BLUR_FADE_DELAY * 2 + id * 0.05} key={post.slug}>
+                  <Link
+                    className="flex flex-col space-y-1 mb-4"
+                    href={`/blog/${post.slug}`}
+                  >
+                    <div className="w-full flex flex-col">
+                      <p className="tracking-tight">{post.metadata.title}</p>
+                      
+                      <p className="h-6 text-xs text-muted-foreground">
+                        {post.metadata.summary}
+                      </p>
+
+                      <p className="h-6 text-xs text-muted-foreground">
+                        {post.metadata.publishedAt}
+                      </p>
+                    </div>
+                  </Link>
                 </BlurFade>
               ))}
-            </ul>
           </BlurFade>
         </div>
       </section>
@@ -206,15 +217,14 @@ export default function Page() {
                 Get in Touch
               </h2>
               <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Want to chat? Just shoot me a dm{" "}
+                Have a question, idea, or just want to say hi? {" "}
                 <Link
-                  href={DATA.contact.social.X.url}
+                  href={DATA.contact.social.LinkedIn.url}
                   className="text-blue-500 hover:underline"
                 >
-                  with a direct question on twitter
+                  feel free to reach out from here.
                 </Link>{" "}
-                and I&apos;ll respond whenever I can. I will ignore all
-                soliciting.
+                I&apos;d love to hear from you.
               </p>
             </div>
           </BlurFade>
