@@ -3,12 +3,12 @@ import { HomeIcon, NotebookIcon } from "lucide-react";
 
 export const DATA = {
   name: "Shailesh Jadav",
-  initials: "SK",
+  initials: "SJ",
   url: "https://github.com/shaileshjadav",
   location: "Ahmedabad, Gujarat, India",
   locationLink: "https://www.google.com/maps/place/ahmedabad",
   description:
-    "Senior Software Engineer. I am a full stack developer passionate about crafting innovative and scalable solutions that bring ideas to life.",
+    "Senior Software Engineer passionate about crafting innovative and scalable solutions that bring ideas to life.",
   summary:
     "I'm a curious builder, backend enthusiast, and tech lead with over 7 years of experience in web development. From crafting robust APIs to scaling container-based infrastructures, I love making things that solve real-world problems. I'm often experimenting with new tools, writing blog posts, or mentoring juniors in the tech community.",
   avatarUrl: "/me.png",
