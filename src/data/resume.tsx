@@ -187,35 +187,28 @@ export const DATA = {
       image: "/video-transcoder.png",
       video: "",
     },
-    // {
-    //   title: "Automatic Chat",
-    //   href: "https://automatic.chat",
-    //   dates: "April 2023 - March 2024",
-    //   active: true,
-    //   description:
-    //     "Developed an AI Customer Support Chatbot which automatically responds to customer support tickets using the latest GPT models.",
-    //   technologies: [
-    //     "Next.js",
-    //     "Typescript",
-    //     "PostgreSQL",
-    //     "Prisma",
-    //     "TailwindCSS",
-    //     "Shadcn UI",
-    //     "Magic UI",
-    //     "Stripe",
-    //     "Cloudflare Workers",
-    //   ],
-    //   links: [
-    //     {
-    //       type: "Website",
-    //       href: "https://automatic.chat",
-    //       icon: <Icons.globe className="size-3" />,
-    //     },
-    //   ],
-    //   image: "",
-    //   video:
-    //     "https://pub-83c5db439b40468498f97946200806f7.r2.dev/automatic-chat.mp4",
-    // },
+    {
+      title: "Burger Builder Web App",
+      href: "https://burger-builder-app.netlify.app/",
+      dates: "Jun, 2023 - August, 2023",
+      active: true,
+      description:
+        "A web application where users can register, log in, build custom burgers, and place orders. Built with React.js, Redux for state management, and Firebase for authentication and real-time database..",
+      technologies: [
+        "React.js",
+        "Redux",
+        "Firebase",
+      ],
+      links: [
+        {
+          type: "Website",
+          href: "https://burger-builder-app.netlify.app/",
+          icon: <Icons.globe className="size-3" />,
+        },
+      ],
+      image: "/burger-builder.png",
+      video:"",
+    },
   ],
   hackathons: [
     {
