@@ -1,0 +1,140 @@
+---
+title: "Let's build own cloudinary"
+publishedAt: "2024-07-20"
+summary: "On Fly Image Processing using CloudFront and Lambda@Edge in NodeJS"
+tags: ['AWS', 'cloudinary', 'cloudfront', 'System Design']
+---
+
+Let's build own cloudinary (e.g. On fly image processing solutions) using CloudFront and Lambda@Edge in NodeJS
+
+## Problem ##
+
+Now days, Heavy Images become essential parts of websites and apps but taking much time to load image become headache for users of website. Optimized images load faster, take less resources, can display different formats as per user screen which give better user experience.
+
+Let’s design system which generate on fly different variants as per frontend needs using AWS cloudfront, Lambda@Edge and sharp library in NodeJS
+
+![aws-image-resize-intro](/blogs/aws-image-resize-intro.webp)
+
+## What is AWS Lambda? ##
+
+[AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html) is a serverless compute service that lets you run code without provisioning or managing servers. It automatically scales your applications, only running your code in response to events such as file uploads or API calls.
+
+For image resizing, Lambda is an excellent choice because it allows you to process images on-demand . With this setup, you can instantly resize, compress, and optimize images without the overhead of maintaining a dedicated server.
+
+## What is CloudFront? ##
+
+[Amazon CloudFront](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html) is a fast content delivery network (CDN) service that securely delivers data, videos, applications, and APIs to customers globally with low latency and high transfer speeds. It integrates with other Amazon Web Services products to give developers and businesses an easy way to accelerate content delivery to end users.
+
+Key features of CloudFront include:
+
+- Global distribution: Content is served from edge locations worldwide, reducing latency
+- Security: It provides both network and application level protection.
+- Integration: Works seamlessly with other AWS services like S3, EC2, and Elastic Load Balancing.
+- Cost-effective: Pay-as-you-go pricing with no upfront fees.
+
+In the context of image resizing, CloudFront can be used to cache and serve the resized images, improving performance and reducing the load on your origin servers.
+
+## What is Lambda@Edge? ##
+
+[Lambda@Edge](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-at-the-edge.html) is an extension of AWS Lambda that allows you to run the code in multiple AWS locations closer to the viewer. These functions can modify CloudFront requests and responses, enabling you to deliver more responsive applications.
+
+In the context of image resizing, Lambda@Edge can intercept requests to CloudFront, analyze the request parameters, and trigger the appropriate image resizing function. This allows for on-the-fly image manipulation without the need for pre-processing or storing multiple versions of each image.
+
+## Lamda Edge Triggers ##
+In a Amazon CloudFront distribution, you can add up to four triggers (associations) that cause a Lambda function to execute when one or more of the following CloudFront events occurs.
+
+**Viewer Request:**  The function executes when CloudFront receives a request from a viewer and before it check in Cloudfront.
+
+**Origin Request:** The function executes only when CloudFront forwards a request to your s3 bucket or origin OR object is not found in cloudfront cache. if object is found in cloudfront cache it doesn’t execute.
+
+**Origin Response:** The function executes after CloudFront receives a response from the origin and before it caches the object in the response.
+
+**Viewer Response:**  The function executes before returning the requested object to the viewer. The function executes regardless of whether the object is already in the cloudfront cache.
+
+## Architecture ##
+
+An image optimization solution can be architected in a variety of ways, based on your requirements in terms of cost, flexibility, and performance.
+
+Here lets discuss architecture which generate different variants of image like (small, medium, large etc) whenever browser (front-end) asks.
+
+![aws-image-resizer-architecture](/blogs/aws-image-resizer-architecture.webp)
+
+**Step-1:**
+
+Let’s frontend loads image with different variants in below format. https://mycloudfront.net/images/test-{format}.png format values can (sm, md, xl, lg).
+
+**Step-2**
+
+Create CloudFront distribution.
+
+Go to Cloudfront → Create a new distribution → Select your S3 bucket→save.
+
+**Step-3**
+
+Create Lamda function in *us-east-1* region
+
+- Go to Lamda services and select ***us-east-1*** from top bar and click on create a new function.
+
+- Enter Function name and Go to Execution role section and choose Create a new role from AWS policy templates.
+
+- Select ***basic Lambda@Edge permissions (for CloudFront trigger)*** from Policy templates.
+
+- At last Create function, it should create a new role given and check from [IAM roles](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/roles) section.
+
+## Step-4: ##
+
+Setup Lamda function triggers (make sure region ***us-east-1*** selected)
+
+- Can Download and modify code from my repo.
+   https://github.com/shaileshjadav/aws-image-resizer/tree/dev/functions
+
+- Click function and upload zip file of code (with node_modules).
+
+- Go to versions tab and **publish version** with appropriate name.
+
+- Go to newly ***created version → Configuration→Triggers***
+
+- Add new trigger → Select ***CloudFront*** in source selection.
+
+- Select an option Configure new CloudFront trigger
+
+- Select your CloudFront distribution and ***origin response*** in CloudFront event
+
+- Check Confirm to deploy and save.
+
+- Wait for change status of Cloudfront for deploying to deployed.
+
+## Step-5: ##
+
+Add Policies for new role.
+
+- Go to ***IAM →Roles → select role*** which is as executor role for lamda function.
+
+- Go to Permissions Tab, Make sure have **AWSLambdaEdgeExecutionRole**
+
+- Add New permission **AmazonS3FullAccess**: Click on Add permission → select ***Attach policy→ select AmazonS3FullAccess*** and click add permissions.
+
+- Go to Trust Relations tab and make sure there is json with ***edgelambda.amazonaws.com*** and ***lambda.amazonaws.com*** services.
+
+## Testing: ##
+- Request image from browser (make sure have image was uploaded s3 before creating cloudfront) in format `https://mycloudfront.net/images/test-{format}.png` (format values: sm, md, lg, xl).
+
+- If requested format was not generated before then it trigger lamda function and generate image variant on same path of S3.
+
+
+## Troubleshooting tips ##
+
+> Make sure Lamda executor role (which is we have created earlier) have S3 bucket access in permissions tab.
+
+> Make sure latest function version executed whenever function updated.
+
+> Check CloudWatch logs.
+
+
+
+
+**Source code**
+
+[https://github.com/shaileshjadav/aws-image-resizer](https://github.com/shaileshjadav/aws-image-resizer)
+
+
