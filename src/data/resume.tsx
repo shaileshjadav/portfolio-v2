@@ -112,7 +112,7 @@ export const DATA = {
   projects: [
     {
       title: "dom-unique-selector",
-      // href: "https://chatcollect.com",
+      href: "",
       dates: "Jan 2025 - Feb 2025",
       active: true,
       description:

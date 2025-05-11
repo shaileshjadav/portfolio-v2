@@ -106,8 +106,8 @@ export default async function Blog({
       ></article>
 
       <div className="flex flex-wrap gap-1 mt-5">
-            {post.metadata.tags.map((skill, id) => (
-                <Badge key={skill}>{skill}</Badge>
+            {post.metadata.tags.map((tag:string) => (
+                <Badge key={tag}>{tag}</Badge>
             ))}
           </div>
       
